@@ -1,0 +1,56 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "🔧 Build",
+      "type": "pwa-node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "build", "--", "${input:brandSelect}"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen"
+    },
+    {
+      "name": "▶️ Start",
+      "type": "pwa-node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start", "--", "${input:brandSelect}"],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal"
+    }
+    // ,
+    // {
+    //   "name": "🧱 NPM build (select brand, run npm script)",
+    //   "type": "pwa-node",
+    //   "request": "launch",
+    //   "runtimeExecutable": "npm",
+    //   "runtimeArgs": ["run", "build", "--", "${input:brandSelect}"],
+    //   "cwd": "${workspaceFolder}",
+    //   "console": "integratedTerminal"
+    // }
+  ],
+  "inputs": [
+    {
+      "id": "brandSelect",
+      "type": "pickString",
+      "description": "Select the brand to build/start",
+      "options": [
+        "Action_Plus",
+        "Black_Voices_Plus",
+        "Cartoons_Plus",
+        "Classic_Movies_Plus",
+        "Comedy_Plus",
+        "Crime_Plus",
+        "Documentary_Max",
+        "Family_Flix_Plus",
+        "Horror_Plus",
+        "Peliculas_Gratis_Plus",
+        "ScreenSavers_Plus",
+        "VHS_Plus",
+        "Westerns_Plus"
+      ]
+    }
+  ]
+}
