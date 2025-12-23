@@ -1,7 +1,4 @@
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable no-undef */
-/* eslint-disable camelcase */
-/* eslint-disable no-unused-vars */
+/* eslint-disable*/
 import React, {
   useCallback,
   useContext,
@@ -36,6 +33,7 @@ import voiceSpeak from '../../utils/accessibility.util';
 import NavigateBack from './navigate-back.component';
 import PlayerLayout from '../../layout/player.layout';
 import Loader from './loader.component';
+import vizioCornerBannerPlugin from '../../plugins/vizioCornerBanner.plugin';
 
 const Player = ({ id, videoData, resumeFrom, handlePlayerClose }) => {
   const videoPlayerContainer = useRef();
@@ -462,6 +460,9 @@ const Player = ({ id, videoData, resumeFrom, handlePlayerClose }) => {
       });
       handleOnButtonFocus('Play');
 
+      // Init VIZIO corner banner plugin once player is ready
+      vizioCornerBannerPlugin.init(playerIns.current);
+
       // initMediaMelon();
 
       playerIns.current.on('loadedmetadata', () => {
@@ -512,6 +513,7 @@ const Player = ({ id, videoData, resumeFrom, handlePlayerClose }) => {
       });
 
       playerIns.current.on('play', () => {
+        vizioCornerBannerPlugin.onPlay();
         setIsBuffer(false);
         setLoader(false);
         if (bufferTimeoutRef.current) {
@@ -552,9 +554,13 @@ const Player = ({ id, videoData, resumeFrom, handlePlayerClose }) => {
           playerCurrentTime.current = watchTime;
           handleUpdateProgressBar(watchTime);
         }
+
+        // Corner banner hook
+        vizioCornerBannerPlugin.onTimeUpdate(watchTime);
       });
 
       playerIns.current.on('pause', () => {
+        vizioCornerBannerPlugin.onPause();
         setIsPlaying(true);
         const watchTime = Math.floor(playerIns.current.currentTime());
         if (watchTime === 0) return;
@@ -591,6 +597,7 @@ const Player = ({ id, videoData, resumeFrom, handlePlayerClose }) => {
       playerIns.current.on('ended', () => {
         setIsPlaying(false);
         videoTimer.current.started = false;
+        vizioCornerBannerPlugin.destroy();
         handlePlayerBack();
       });
 
@@ -873,6 +880,9 @@ const Player = ({ id, videoData, resumeFrom, handlePlayerClose }) => {
     }
 
     return () => {
+      // Ensure corner banner plugin is fully cleaned up
+      vizioCornerBannerPlugin.destroy();
+
       if (playerIns.current) {
         setTimeout(() => {
           playerIns.current.dispose();
