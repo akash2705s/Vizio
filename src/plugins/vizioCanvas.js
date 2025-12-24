@@ -278,15 +278,11 @@ export const createTrappedDiv = (parentElement, player, currentTime) => {
       childDiv.parentNode.removeChild(childDiv);
     }
 
-    // Restore player UI state - return to normal behavior ONLY AFTER QR CODE DISAPPEARED
+    // Keep player UI hidden after QR code cleanup - UI will only appear on user interaction
+    // Video playback continues normally, but UI remains hidden until user interacts
     if (playerOverlay) {
-      // If overlay was previously visible, restore it; otherwise let normal behavior handle it
-      if (previousPlayerOverlayDisplay && previousPlayerOverlayDisplay !== 'none') {
-        playerOverlay.style.display = previousPlayerOverlayDisplay;
-      } else {
-        // Reset to default state - normal player behavior will handle showing/hiding
-        playerOverlay.style.display = 'none';
-      }
+      // Always keep UI hidden - Player.jsx will handle showing it on user interaction
+      playerOverlay.style.display = 'none';
     }
   };
 
