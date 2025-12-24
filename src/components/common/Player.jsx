@@ -1,7 +1,4 @@
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable no-undef */
-/* eslint-disable camelcase */
-/* eslint-disable no-unused-vars */
+/* eslint-disable*/
 import React, {
   useCallback,
   useContext,
@@ -36,8 +33,9 @@ import voiceSpeak from '../../utils/accessibility.util';
 import NavigateBack from './navigate-back.component';
 import PlayerLayout from '../../layout/player.layout';
 import Loader from './loader.component';
+import vizioCornerBannerPlugin from '../../plugins/vizioCanvas';
 
-const Player = ({ id, videoData, resumeFrom, handlePlayerClose, isDeepLink = false }) => {
+const Player = ({ id, videoData, resumeFrom, handlePlayerClose }) => {
   const videoPlayerContainer = useRef();
   const playerIns = useRef();
   const timeoutRef = useRef();
@@ -343,12 +341,10 @@ const Player = ({ id, videoData, resumeFrom, handlePlayerClose, isDeepLink = fal
   }, []);
 
   const handlePlayerBack = useCallback(() => {
-    if (videoData?.id) {
-      setUserVideoProgress(
-        videoData.id || videoData._id,
-        Number(playerCurrentTime.current)
-      );
-    }
+    setUserVideoProgress(
+      videoData.id || videoData._id,
+      Number(playerCurrentTime.current)
+    );
     handlePlayerClose();
   }, []);
 
@@ -464,6 +460,9 @@ const Player = ({ id, videoData, resumeFrom, handlePlayerClose, isDeepLink = fal
       });
       handleOnButtonFocus('Play');
 
+      // Init VIZIO corner banner plugin once player is ready
+      vizioCornerBannerPlugin.init(playerIns.current);
+
       // initMediaMelon();
 
       playerIns.current.on('loadedmetadata', () => {
@@ -514,6 +513,7 @@ const Player = ({ id, videoData, resumeFrom, handlePlayerClose, isDeepLink = fal
       });
 
       playerIns.current.on('play', () => {
+        vizioCornerBannerPlugin.onPlay();
         setIsBuffer(false);
         setLoader(false);
         if (bufferTimeoutRef.current) {
@@ -554,9 +554,13 @@ const Player = ({ id, videoData, resumeFrom, handlePlayerClose, isDeepLink = fal
           playerCurrentTime.current = watchTime;
           handleUpdateProgressBar(watchTime);
         }
+
+        // Corner banner hook
+        vizioCornerBannerPlugin.onTimeUpdate(watchTime);
       });
 
       playerIns.current.on('pause', () => {
+        vizioCornerBannerPlugin.onPause();
         setIsPlaying(true);
         const watchTime = Math.floor(playerIns.current.currentTime());
         if (watchTime === 0) return;
@@ -593,6 +597,7 @@ const Player = ({ id, videoData, resumeFrom, handlePlayerClose, isDeepLink = fal
       playerIns.current.on('ended', () => {
         setIsPlaying(false);
         videoTimer.current.started = false;
+        vizioCornerBannerPlugin.destroy();
         handlePlayerBack();
       });
 
@@ -601,10 +606,8 @@ const Player = ({ id, videoData, resumeFrom, handlePlayerClose, isDeepLink = fal
       });
 
       // Set total duration
-      if (videoData.duration) {
-        const totalDuration = timeFormat(Math.floor(videoData.duration));
-        window.document.getElementById('total-time').innerText = totalDuration;
-      }
+      const totalDuration = timeFormat(Math.floor(videoData.duration));
+      window.document.getElementById('total-time').innerText = totalDuration;
 
     } catch (e) {
       // ignore
@@ -629,18 +632,16 @@ const Player = ({ id, videoData, resumeFrom, handlePlayerClose, isDeepLink = fal
     // const lmt = isLmtEnabled ? getUUID() : ifa;
     const lmt1 = isLmtEnabled ? getUUID() : ifa;
 
-    const videodetails = videoData;
+    let videodetails = videoData;
 
     /// url params
-    // const urlParams = new URLSearchParams(window.location.search);
-    // const hls_url = urlParams.get('hls_url');
-    // let isDeepLink = false;
-    // if (hls_url) {
-    //   videodetails = {
-    //     hls_url,
-    //   };
-    //   isDeepLink = true;
-    // }
+    const urlParams = new URLSearchParams(window.location.search);
+    const hls_url = urlParams.get('hls_url');
+    if (hls_url) {
+      videodetails = {
+        hls_url,
+      };
+    }
 
     const ipAddress = playerObj.ip;
 
@@ -871,11 +872,7 @@ const Player = ({ id, videoData, resumeFrom, handlePlayerClose, isDeepLink = fal
     if (videoData.hlsUrl || videoData.hls_url) {
       playerObj.videoUrl = videoData.hlsUrl || videoData.hls_url;
       initPlayer();
-    } else if (isDeepLink) {
-      playerObj.videoUrl = videoData
-      initPlayer();
-    }
-    else {
+    } else {
       getVideoDetail(videoId).then((response) => {
         playerObj.videoUrl = response.hlsUrl;
         initPlayer();
@@ -883,6 +880,9 @@ const Player = ({ id, videoData, resumeFrom, handlePlayerClose, isDeepLink = fal
     }
 
     return () => {
+      // Ensure corner banner plugin is fully cleaned up
+      vizioCornerBannerPlugin.destroy();
+
       if (playerIns.current) {
         setTimeout(() => {
           playerIns.current.dispose();
@@ -1250,7 +1250,6 @@ Player.propTypes = {
   videoData: PropTypes.object.isRequired,
   resumeFrom: PropTypes.number.isRequired,
   handlePlayerClose: PropTypes.func.isRequired,
-  isDeepLink: PropTypes.bool.isRequired,
 };
 
 export default Player;
