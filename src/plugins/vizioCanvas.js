@@ -21,6 +21,9 @@ export function getFocusSnapshot(label = '') {
 // Module-level state for tracking banner triggers
 let previousTime = 0;
 const shownBanners = new Set();
+let isPaused = false;
+let lastKnownTime = 0;
+let pendingBannerTime = null; // Banner threshold that was crossed while paused
 
 // Session storage key for persisting shown banners across video changes
 const STORAGE_KEY = 'vizio_canvas_shown_banners';
@@ -50,9 +53,9 @@ const saveShownBanners = () => {
 
 // Banner configuration: [timeThreshold, adIndex, impIndex, engIndex, displayDurationMs]
 const BANNER_CONFIGS = [
-  [180, 0, 0, 0, 20000], // First banner at 180s (3min), shows for 4 seconds after button click
-  [1800, 2, 2, 2, 20000], // Second banner at 540s (9min), shows for 5 seconds after button click
-  [2700, 1, 1, 1, 20000], // Third banner at 720s (12min), shows for 5 seconds after button click
+  [180, 0, 0, 0, 5000], // First banner at 180s (3min), shows for 4 seconds after button click
+  [1800, 2, 2, 2, 5000], // Second banner at 540s (9min), shows for 5 seconds after button click
+  [2700, 1, 1, 1, 5000], // Third banner at 720s (12min), shows for 5 seconds after button click
 ];
 
 // Reset function to clear banner state (call when starting a new video)
@@ -61,6 +64,9 @@ const BANNER_CONFIGS = [
 export const resetBannerState = (clearStorage = false) => {
   previousTime = 0;
   shownBanners.clear();
+  isPaused = false;
+  lastKnownTime = 0;
+  pendingBannerTime = null;
   if (clearStorage) {
     try {
       sessionStorage.removeItem(STORAGE_KEY);
@@ -79,22 +85,53 @@ export const createTrappedDiv = (parentElement, player, currentTime) => {
   // Only one overlay at a time
   if (document.querySelector('[id^="trapped-overlay-div"]')) return;
 
+  // NEVER show banners while paused - only during playback
+  if (isPaused) {
+    // Update lastKnownTime for seek detection
+    lastKnownTime = currentTime;
+    return;
+  }
+
   // Check if any banner threshold was crossed
   let triggeredBanner = null;
-  for (const [bannerTime, adIndex, impIndex, engIndex, displayDuration] of BANNER_CONFIGS) {
-    // Skip if already shown
-    if (shownBanners.has(bannerTime)) continue;
+  let triggeredBannerTime = null;
 
-    if (currentTime >= bannerTime) {
-      triggeredBanner = { bannerTime, adIndex, impIndex, engIndex, displayDuration };
-      shownBanners.add(bannerTime);
-      saveShownBanners(); // Persist to sessionStorage
-      break;
+  // First, check if there's a pending banner from a seek while paused
+  if (pendingBannerTime !== null) {
+    for (const [bannerTime, adIndex, impIndex, engIndex, displayDuration] of BANNER_CONFIGS) {
+      if (bannerTime === pendingBannerTime && !shownBanners.has(bannerTime)) {
+        triggeredBanner = { bannerTime, adIndex, impIndex, engIndex, displayDuration };
+        triggeredBannerTime = bannerTime;
+        shownBanners.add(bannerTime);
+        saveShownBanners();
+        pendingBannerTime = null; // Clear pending banner after showing
+        break;
+      }
     }
   }
 
-  // Update previousTime for next call
+  // If no pending banner, check normal threshold crossing
+  if (!triggeredBanner) {
+    for (const [bannerTime, adIndex, impIndex, engIndex, displayDuration] of BANNER_CONFIGS) {
+      // Skip if already shown
+      if (shownBanners.has(bannerTime)) continue;
+
+      // Check if we crossed the threshold (currentTime >= bannerTime and previousTime < bannerTime)
+      if (currentTime >= bannerTime && previousTime < bannerTime) {
+        triggeredBanner = { bannerTime, adIndex, impIndex, engIndex, displayDuration };
+        triggeredBannerTime = bannerTime;
+        shownBanners.add(bannerTime);
+        saveShownBanners(); // Persist to sessionStorage
+        break;
+      }
+    }
+  }
+
+  // Update previousTime and lastKnownTime for next call
   previousTime = currentTime;
+  if (!isPaused) {
+    lastKnownTime = currentTime;
+  }
 
   // Exit if no banner should trigger
   if (!triggeredBanner) return;
@@ -400,9 +437,67 @@ const vizioCornerBannerPlugin = {
   init(playerInstance) {
     this.player = playerInstance;
     resetBannerState();
+
+    // Listen for seeked event to detect seeks while paused
+    if (playerInstance) {
+      playerInstance.on('seeked', () => {
+        if (!this.player) return;
+
+        const seekedTime = Math.floor(this.player.currentTime());
+
+        // If paused and seek crossed a banner threshold, mark it as pending
+        if (isPaused) {
+          // Find the next eligible banner that was crossed by this seek
+          // Only check banners that haven't been shown and that the seek crossed
+          let nextEligibleBanner = null;
+          for (const [bannerTime] of BANNER_CONFIGS) {
+            // Skip if already shown
+            if (shownBanners.has(bannerTime)) continue;
+
+            // If seeked time crossed the threshold (seekedTime >= bannerTime and lastKnownTime < bannerTime)
+            if (seekedTime >= bannerTime && lastKnownTime < bannerTime) {
+              // This is the next eligible banner (first one we encounter in order)
+              nextEligibleBanner = bannerTime;
+              break; // Only mark the first eligible banner (no retroactive banners)
+            }
+          }
+
+          if (nextEligibleBanner !== null) {
+            pendingBannerTime = nextEligibleBanner;
+          }
+
+          lastKnownTime = seekedTime;
+        } else {
+          // If not paused, update lastKnownTime normally
+          lastKnownTime = seekedTime;
+          previousTime = seekedTime;
+        }
+      });
+    }
   },
-  onPlay() { },
-  onPause() { },
+  onPlay() {
+    isPaused = false;
+    if (this.player) {
+      const currentTime = Math.floor(this.player.currentTime());
+      lastKnownTime = currentTime;
+
+      // When play resumes, check for pending banners immediately
+      if (pendingBannerTime !== null) {
+        // Trigger banner check - onTimeUpdate will also handle it, but this ensures immediate check
+        setTimeout(() => {
+          if (this.player && !isPaused) {
+            createTrappedDiv(document.body, this.player, currentTime);
+          }
+        }, 100);
+      }
+    }
+  },
+  onPause() {
+    isPaused = true;
+    if (this.player) {
+      lastKnownTime = Math.floor(this.player.currentTime());
+    }
+  },
   onTimeUpdate(currentTimeSeconds) {
     if (!this.player) return;
     // Parent element isn't actually used (we always append to body),
