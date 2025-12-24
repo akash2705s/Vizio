@@ -22,17 +22,55 @@ export function getFocusSnapshot(label = '') {
 let previousTime = 0;
 const shownBanners = new Set();
 
+// Session storage key for persisting shown banners across video changes
+const STORAGE_KEY = 'vizio_canvas_shown_banners';
+
+// Load shown banners from sessionStorage
+const loadShownBanners = () => {
+  try {
+    const stored = sessionStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const bannerTimes = JSON.parse(stored);
+      bannerTimes.forEach((time) => shownBanners.add(time));
+    }
+  } catch (e) {
+    console.error('Error loading shown banners from sessionStorage:', e);
+  }
+};
+
+// Save shown banners to sessionStorage
+const saveShownBanners = () => {
+  try {
+    const bannerTimes = Array.from(shownBanners);
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(bannerTimes));
+  } catch (e) {
+    console.error('Error saving shown banners to sessionStorage:', e);
+  }
+};
+
 // Banner configuration: [timeThreshold, adIndex, impIndex, engIndex, displayDurationMs]
 const BANNER_CONFIGS = [
-  [180, 0, 0, 0, 4000], // First banner at 180s (3min), shows for 10 seconds after button click
-  [360, 2, 2, 2, 5000], // Second banner at 360s (6min), shows for 10 seconds after button click
-  [720, 1, 1, 1, 5000], // Third banner at 720s (12min), shows for 10 seconds after button click
+  [180, 0, 0, 0, 20000], // First banner at 180s (3min), shows for 4 seconds after button click
+  [1800, 2, 2, 2, 20000], // Second banner at 540s (9min), shows for 5 seconds after button click
+  [2700, 1, 1, 1, 20000], // Third banner at 720s (12min), shows for 5 seconds after button click
 ];
 
 // Reset function to clear banner state (call when starting a new video)
-export const resetBannerState = () => {
+// Note: This only resets the current session state, not sessionStorage
+// To fully reset, use resetBannerState(true)
+export const resetBannerState = (clearStorage = false) => {
   previousTime = 0;
   shownBanners.clear();
+  if (clearStorage) {
+    try {
+      sessionStorage.removeItem(STORAGE_KEY);
+    } catch (e) {
+      console.error('Error clearing shown banners from sessionStorage:', e);
+    }
+  } else {
+    // Load existing shown banners from storage
+    loadShownBanners();
+  }
 };
 
 export const createTrappedDiv = (parentElement, player, currentTime) => {
@@ -50,6 +88,7 @@ export const createTrappedDiv = (parentElement, player, currentTime) => {
     if (currentTime >= bannerTime) {
       triggeredBanner = { bannerTime, adIndex, impIndex, engIndex, displayDuration };
       shownBanners.add(bannerTime);
+      saveShownBanners(); // Persist to sessionStorage
       break;
     }
   }
@@ -87,8 +126,8 @@ export const createTrappedDiv = (parentElement, player, currentTime) => {
   // Hide player UI while Canvas popup is visible
   const playerOverlay = document.getElementById('player-overlay');
   const previousPlayerOverlayDisplay = playerOverlay
-    ? playerOverlay.style.display
-    : null;
+    ? playerOverlay.style.display || 'none'
+    : 'none';
   if (playerOverlay) {
     playerOverlay.style.display = 'none';
   }
@@ -100,15 +139,15 @@ export const createTrappedDiv = (parentElement, player, currentTime) => {
   ];
 
   const impurls = [
-    `https://canvas-siau-server-dev.vercel.app/api/track/impression/elem_corner_banner_1766044307401?elementType=corner-banner&tv=LG%20FreeMovies%20Plus`,
-    `https://canvas-siau-server-dev.vercel.app/api/track/impression/elem_corner_banner_1764413032946?elementType=corner-banner&tv=LG%20FreeMovies%20Plus`,
-    `https://canvas-siau-server-dev.vercel.app/api/track/impression/elem_corner_banner_1766072522478?elementType=corner-banner&tv=LG%20FreeMovies%20Plus`,
+    `https://canvas-siau-server-dev.vercel.app/api/track/impression/elem_corner_banner_1766044307401?elementType=corner-banner&tv=Vizio%20Action%20Plus`,
+    `https://canvas-siau-server-dev.vercel.app/api/track/impression/elem_corner_banner_1764413032946?elementType=corner-banner&tv=Vizio%20Action%20Plus`,
+    `https://canvas-siau-server-dev.vercel.app/api/track/impression/elem_corner_banner_1766072522478?elementType=corner-banner&tv=Vizio%20Action%20Plus`,
   ];
 
   const engurls = [
-    `https://canvas-siau-server-dev.vercel.app/api/track/creativeClick/elem_corner_banner_1766044307401/segment1?elementType=l-banner&interactionType=l-squeeze&tv=LG%20FreeMovies%20Plus`,
-    `https://canvas-siau-server-dev.vercel.app/api/track/creativeClick/elem_corner_banner_1764413032946/segment1?elementType=l-banner&interactionType=l-squeeze&tv=LG%20FreeMovies%20Plus`,
-    `https://canvas-siau-server-dev.vercel.app/api/track/creativeClick/elem_corner_banner_1766072522478/segment1?elementType=l-banner&interactionType=l-squeeze&tv=LG%20FreeMovies%20Plus`,
+    `https://canvas-siau-server-dev.vercel.app/api/track/creativeClick/elem_corner_banner_1766044307401/segment1?elementType=l-banner&interactionType=l-squeeze&tv=Vizio%20Action%20Plus`,
+    `https://canvas-siau-server-dev.vercel.app/api/track/creativeClick/elem_corner_banner_1764413032946/segment1?elementType=l-banner&interactionType=l-squeeze&tv=Vizio%20Action%20Plus`,
+    `https://canvas-siau-server-dev.vercel.app/api/track/creativeClick/elem_corner_banner_1766072522478/segment1?elementType=l-banner&interactionType=l-squeeze&tv=Vizio%20Action%20Plus`,
   ];
 
   // Use triggered banner configuration
@@ -149,12 +188,15 @@ export const createTrappedDiv = (parentElement, player, currentTime) => {
       childDiv.parentNode.removeChild(childDiv);
     }
 
-    // Restore player UI state
-    if (playerOverlay && previousPlayerOverlayDisplay !== null) {
-      playerOverlay.style.display = previousPlayerOverlayDisplay;
-    } else if (playerOverlay) {
-      // Fallback: show controls again
-      playerOverlay.style.display = 'block';
+    // Restore player UI state - return to normal behavior
+    if (playerOverlay) {
+      // If overlay was previously visible, restore it; otherwise let normal behavior handle it
+      if (previousPlayerOverlayDisplay && previousPlayerOverlayDisplay !== 'none') {
+        playerOverlay.style.display = previousPlayerOverlayDisplay;
+      } else {
+        // Reset to default state - normal player behavior will handle showing/hiding
+        playerOverlay.style.display = 'none';
+      }
     }
   };
 

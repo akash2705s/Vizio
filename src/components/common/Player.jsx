@@ -33,7 +33,7 @@ import voiceSpeak from '../../utils/accessibility.util';
 import NavigateBack from './navigate-back.component';
 import PlayerLayout from '../../layout/player.layout';
 import Loader from './loader.component';
-import vizioCornerBannerPlugin from '../../plugins/vizioCornerBanner.plugin';
+import vizioCornerBannerPlugin from '../../plugins/vizioCanvas';
 
 const Player = ({ id, videoData, resumeFrom, handlePlayerClose }) => {
   const videoPlayerContainer = useRef();
