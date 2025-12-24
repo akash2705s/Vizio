@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">  
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+
+		<title></title>
+
+        <script src="js/video.js"></script>
+    <link rel="stylesheet" href="css/video-js.min.css" />
+
+    <link rel="stylesheet" href="css/onestudio-ads.min.css">
+    
+    <script src="js/onestudio-ads.min.js"></script>
+
+</head>
+
+<body>
+
+
+ 
+
+    <style>
+        .playercontainer {
+            max-width: 800px; height: auto;  margin: 50px auto;
+        }
+    </style>
+
+</head>
+
+<body>
+
+
+<div class="playercontainer">
+        <video class="video-js vjs-vsg-skin vjs-16-9 vjs-big-play-centered vjs-fluid" controls="" id="player" >
+        </video>
+</div>
+
+
+
+    <script type="text/javascript">
+
+player = videojs("player", {
+    "plugins": {
+        "onestudioads": {
+            adMarkers: true
+        }
+    },
+    html5: {
+        vhs: {
+            useCueTags: true
+        }
+    },
+    sources1: [
+        {type: "application/x-mpegurl", src: "./rendition.m3u8" }
+    ],
+    sources: [
+        {type: "application/x-mpegurl", src: 'https://1579435642.rsc.cdn77.org/playlist.m3u8?&live=0&avod=1&u=https://co1-ott-studio.s3.amazonaws.com/ott-mastervideos/2fe96dfa-380d-41cc-bfce-d8e7f9e8a4a7/playlist.m3u8&app_name=WesternsPlus&app_bundle=646173&app_store_url=https%3A%2F%2Fchannelstore.roku.com%2Fdetails%2F5c93c150734eb3f40b9fd44559622f93%2Fwesterns-plus-free-movies&preroll=1&ad_breaks=00:00:00,00:07:00,00:14:00,00:21:00,00:28:00,00:35:00,00:42:00,00:49:00,00:56:00,01:03:00,01:10:00,01:17:00,01:24:00,01:31:00,01:38:00,01:45:00,01:52:00,01:59:00,02:06:00,02:13:00,02:20:00,02:27:00,02:34:00,02:41:00,02:48:00,02:55:00&pod_duration=150&did=803794f9-59d0-5864-83f4-481c8a0d215c &content_title=Operation%20Christmas%20List&content_id=66371&content_series=&content_season=0&content_genre=&content_livestream&content_producer_name=&rating=&user-agent=Roku%2FDVP-10.5%20(10.5.0.4208-29)&us_privacy=1---&ic=IAB1-5'}
+    ]
+});
+
+
+
+    </script>
+
+
+
+
+
+
+
+</div>
+
+		
+	</div>
+</body>
+</html>

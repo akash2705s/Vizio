@@ -1,0 +1,74 @@
+{
+  "common": {
+    "yes": "Yes",
+    "no": "No",
+    "watch": "Watch",
+    "more_details": "More Details",
+    "version": "Version"
+  },
+  "message": {
+    "profile_name_not_empty": "Profile name cannot be empty",
+    "email_must_not_be_empty": "Email must not be empty",
+    "invalid_email": "Invalid email address",
+    "password_not_empty": "Password cannot be empty",
+    "login_invalid_credentials_error": "Incorrect email or password",
+    "logout_confirmation": "You have successfully logged out!",
+    "something_went_wrong": "Something went wrong"
+  },
+  "header": {
+    "my_list": "Favorites",
+    "account_tab": "Account"
+  },
+  "login": {
+    "login_title": "Sign in to your account",
+    "login_button": "Login",
+    "link_your_device": "Connect your device",
+    "get_new_code": "Get a new code",
+    "email_hint": "Email",
+    "password_hint": "Password"
+  },
+  "account": {
+    "logout_text": "Logout",
+    "user_data_update_title": "Manage Your Account",
+    "update_user_data_message": "Update your name, email, or password by scanning the QR code with your mobile device",
+    "you_have_logged_in_as": "You have logged in as:",
+    "switch_profile": "Switch Profile"
+  },
+  "logout_confirmation": {
+    "log_out_dialog_message": "Are you sure you want to log out?"
+  },
+  "home": {
+    "continue_watching": "Continue Watching",
+    "newly_added": "Newly Added",
+    "popular": "Popular"
+  },
+  "sort_options": {
+    "text_sort_all": "All",
+    "text_sort_popular": "Popular",
+    "text_sort_newest": "Newest",
+    "text_sort_oldest": "Oldest",
+    "text_sort_a_z": "A-Z"
+  },
+  "details": {
+    "episodes": "Episodes",
+    "similar_text": "Similar",
+    "launch_at": "Launched at:"
+  },
+  "search": {
+    "pre_search_message": "Search results will be displayed here!",
+    "search_hint": "Search here...",
+    "no_search_result_message": "No results found. Try another keyword!"
+  },
+  "my_list": {
+    "no_item_available": "No videos available in my list!"
+  },
+  "exit_confirmation": {
+    "exit_app": "Exit application",
+    "exit_dialog_message": "Are you sure you want to exit the application?"
+  },
+  "confirm_prompt": {
+    "confirm_dialog_message": "Something went wrong",
+    "confirm_btn_text": "Retry",
+    "cancel_btn_text": "Exit"
+  }
+}

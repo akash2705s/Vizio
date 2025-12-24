@@ -1,0 +1,8 @@
+node_modules
+public
+build
+src/onestudio-ssai-ads
+.husky
+
+.env-sample
+.env

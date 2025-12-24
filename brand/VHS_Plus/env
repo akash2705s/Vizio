@@ -1,0 +1,32 @@
+# Port on which app will run
+PORT=3100
+PUBLIC_URL=
+
+# App name
+REACT_APP_NAME=VHS +
+
+# Channel data url
+REACT_APP_CHANNEL_DATA_JSON=https://ott.1stud.io/api/channel_451
+REACT_APP_VIZIO_VAST_URL=https://tv.ads.vizio.com/rt/27047?w=1920&h=1080&cb={{CACHEBUSTER}}&ip={{IP}}&ua={{USER_AGENT}}&pod_max_dur=150&app_bundle=vizio.vhsplus&app_name=VHS_Plus&app_store_url=https://www.vizio.com/en/smart-tv-apps?appName=vhs+&appId=vizio.vhs+&did={{DEVICE_ID}}&us_privacy=1---&schain=1&DNT=0&ifa_type={{IFA_TYPE}}&lmt=0&gdpr={{GDPR}}&gdpr_consent={{CONSENT}}&content_genre={{CONTENT_GENRE}}&rating={{RATING}}&coppa=0&language=en&content_livestream=0&content_title={{CONTENT_TITLE}}
+
+# IP Service url
+REACT_APP_GET_IP_URL=https://api.ipify.org
+
+# Analytics
+REACT_APP_VIDEO_ANALYTICS_URL=http://app.channelalyzer.com
+
+# Vizio Configs
+REACT_APP_VIZIO_APP_NAME=VHS+
+REACT_APP_VIZIO_CHANNEL_NAME=VHS+
+REACT_APP_VIZIO_APPSTORE_URL=https://www.vizio.com/en/smart-tv-apps?appName=vhs+&appId=vizio.vhsplus
+REACT_APP_VIZIO_APP_BUNDLE=
+
+# APP Brand Primary Color
+REACT_APP_BASE_PRIMARY_COLOR=#F000D8
+
+
+#NOT USED ENV VARIABLES
+REACT_APP_VAST_BASE_URL=https://1stud.io/api/channel_293/vastcsai_roku_json
+REACT_APP_VAST_PARAMS=cb={cb}&ua={ua}&dnt={dnt}&content_id={video_id}&content_episode={content_episode}&content_title={media_title}&content_series={series_title}&content_season={content_season}&content_genre={content_genre}&rating={video_rating}&language={language}&content_duration={content_duration}&content_len={content_len}&did={device_ifa}&us_privacy={us_privacy}&slot_type={slot_type}&os={os}&osv={osv}&model={model}&device_height={device_height}&device_width={device_width}&imp_video_height={player_height}&imp_video_width={player_width}&connection_type={connection_type}&category={category}&content_categories={content_categories}&content_type={content_type}&app_name={app_name}&page_url={page_url}&app_version={app_version}&vid_duration={vid_duration}&gdpr={GDPR}&gdpr_consent={CONSENT}&ifa_type={IFA_TYPE}&coppa={COPPA}&pod_ad_slots={POD_AD_SLOTS}&content_livestream={CONTENT_LIVESTREAM}
+REACT_APP_DIRECT_VAST_URL=https://ott.1stud.io/api/channel_454/vastcsai_roku_v2_json
+REACT_APP_MEDIA_DATA_JSON=

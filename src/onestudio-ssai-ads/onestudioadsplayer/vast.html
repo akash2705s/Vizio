@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">  
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+
+		<title></title>
+
+        <script src="js/video.js"></script>
+    <link rel="stylesheet" href="css/video-js.min.css" />
+
+    <link rel="stylesheet" href="css/onestudio-ads.min.css">
+    
+    <script src="js/onestudio-ads.min.js"></script>
+
+</head>
+
+<body>
+
+
+ 
+
+    <style>
+        .playercontainer {
+            max-width: 800px; height: auto;  margin: 50px auto;
+        }
+    </style>
+
+</head>
+
+<body>
+
+
+<div class="playercontainer">
+        <video class="video-js vjs-vsg-skin vjs-16-9 vjs-big-play-centered vjs-fluid" controls="" id="player" >
+        </video>
+</div>
+
+
+
+    <script type="text/javascript">
+
+player = videojs("player", {
+    "autoplay": true,
+    "plugins": {
+        "onestudioads": {
+            type: "vast",
+            midrollInterval: 7,
+            skippable: false,
+            adMarkers: false,
+            url: 'https://tv.springserve.com/rt/10092?w=1920&h=1080&cb=ROKU_ADS_CACHE_BUSTER&ip=ROKU_ADS_EXTERNAL_IP&ua=ROKU_ADS_USER_AGENT&app_bundle=588207&app_name=Free%20Movies%20Plus&did=ROKU_ADS_TRACKING_ID&pod_max_dur=150&app_store_url=https://channelstore.roku.com/details/6e91c3d25be3363bb47200afe413fded/free-movies-plus&content_id=ROKU_ADS_CONTENT_ID&content_episode=REPLACE_MACRO&content_title=REPLACE_MACRO&content_series=REPLACE_MACRO&content_season=REPLACE_MACRO&content_genre=REPLACE_MACRO&content_livestream=REPLACE_MACRO&content_producer_name=REPLACE_MACRO&rating=REPLACE_MACRO&channel_name=REPLACE_MACRO&content_custom_1_param=REPLACE_MACRO&content_custom_2_param=REPLACE_MACRO&content_custom_3_param=REPLACE_MACRO&language=REPLACE_MACRO&network_name=REPLACE_MACRO&gdpr=REPLACE_MACRO&us_privacy=1---&schain=REPLACE_MACRO&lmt=ROKU_ADS_LIMIT_TRACKING&ic=IAB1-5'
+        }
+    },
+    sources: [
+        {type: "application/x-mpegurl", src: "https://co1-ott-studio.s3.amazonaws.com/ott-mastervideos/9b474e6d-2a06-4271-b5cb-3f7b13e6cf10/playlist.m3u8" }
+    ],
+});
+
+player.on("vastads", (e, ads) => {
+    console.log("Vast Ads: ", ads);
+});
+
+player.on("adslot", (e, ad) => {
+    console.log("Next Ad Slot: ", ad);
+});
+
+
+
+
+    </script>
+
+
+
+
+
+
+
+</div>
+
+		
+	</div>
+</body>
+</html>
